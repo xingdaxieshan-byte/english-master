@@ -192,6 +192,156 @@ updateStats();
 }
 updateStats();
 </script>
+
+<style>
+#freeAI {
+  background: white;
+  color: #222;
+  padding: 18px;
+  margin: 20px 0;
+  border-radius: 14px;
+}
+#freeAI input, #freeAI select {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border: 1px solid #aaa;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+#freeAI button {
+  background: #17365d;
+  color: white;
+  border: 0;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 5px 0;
+}
+#freeAI .aiResult {
+  background: #eef4fb;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+  white-space: pre-wrap;
+}
+</style>
+
+<section id="freeAI">
+  <h2>English Master 学習サポート</h2>
+  <p>無料で使える3つの学習機能</p>
+
+  <hr>
+  <h3>① 英語先生</h3>
+  <p>英文や分からない問題を入力してね。</p>
+  <input id="teacherInput" placeholder="例：He play tennis.">
+  <button onclick="freeTeacher()">解説を見る</button>
+  <div id="teacherResult" class="aiResult">ここに解説が表示されます。</div>
+
+  <hr>
+  <h3>② 問題作成</h3>
+  <select id="aiLevel">
+    <option value="基礎">基礎</option>
+    <option value="標準">標準</option>
+    <option value="応用">応用</option>
+  </select>
+  <button onclick="freeQuestion()">問題を作る</button>
+  <div id="questionResult" class="aiResult">ここに問題が表示されます。</div>
+
+  <hr>
+  <h3>③ 英文添削</h3>
+  <p>チェックしたい英文を入力してね。</p>
+  <input id="correctionInput" placeholder="例：I likes music.">
+  <button onclick="freeCorrect()">英文をチェック</button>
+  <div id="correctionResult" class="aiResult">ここに添削結果が表示されます。</div>
+</section>
+
+<script>
+function freeTeacher() {
+  const s = document.getElementById("teacherInput").value.trim();
+  const r = document.getElementById("teacherResult");
+  if (!s) {
+    r.textContent = "英文や問題を入力してね。";
+    return;
+  }
+  let msg = "入力された英文： " + s + "\n\n";
+  msg += "【確認ポイント】\n";
+  msg += "・主語と動詞の関係を確認しよう。\n";
+  msg += "・時制（現在・過去）を確認しよう。\n";
+  msg += "・単数・複数に注意しよう。\n";
+  msg += "・分からない単語の意味も調べよう。\n\n";
+  if (/\b(he|she|it)\b/i.test(s)) {
+    msg += "ヒント：主語がhe・she・itで現在形なら、一般動詞にsが付くことが多いよ。";
+  } else {
+    msg += "ヒント：まず主語と動詞を見つけてみよう！";
+  }
+  r.textContent = msg;
+}
+
+const freeQuestions = [
+  {q:"「彼はテニスをします。」に合う英文は？",a:["He play tennis.","He plays tennis.","He playing tennis."],c:1,e:"Heが主語の現在形では、一般動詞にsを付けるよ。"},
+  {q:"「私は昨日忙しかった。」に合う英文は？",a:["I am busy yesterday.","I was busy yesterday.","I were busy yesterday."],c:1,e:"yesterdayは過去を表すのでwasを使うよ。"},
+  {q:"「あなたは英語を話せますか。」に合う英文は？",a:["Can you speak English?","Do you can speak English?","Are you speak English?"],c:0,e:"canを使う疑問文はCanを文の先頭に置くよ。"},
+  {q:"「私は音楽に興味があります。」に合う英文は？",a:["I am interested in music.","I interested music.","I am interest in music."],c:0,e:"be interested in ～で「～に興味がある」だよ。"},
+  {q:"「これは私の本です。」に合う英文は？",a:["This are my book.","This is my book.","This am my book."],c:1,e:"Thisは単数なのでisを使うよ。"}
+];
+let freeCurrent = null;
+
+function freeQuestion() {
+  freeCurrent = freeQuestions[Math.floor(Math.random()*freeQuestions.length)];
+  const level = document.getElementById("aiLevel").value;
+  const r = document.getElementById("questionResult");
+  r.innerHTML = "";
+  const q = document.createElement("p");
+  q.textContent = "【" + level + "】" + freeCurrent.q;
+  r.appendChild(q);
+  freeCurrent.a.forEach((a,i) => {
+    const b = document.createElement("button");
+    b.textContent = a;
+    b.style.display = "block";
+    b.style.width = "100%";
+    b.onclick = () => {
+      const result = document.createElement("p");
+      result.textContent = (i === freeCurrent.c ? "正解！" : "不正解。") + "\n" + freeCurrent.e;
+      r.appendChild(result);
+    };
+    r.appendChild(b);
+  });
+}
+
+function freeCorrect() {
+  const s = document.getElementById("correctionInput").value.trim();
+  const r = document.getElementById("correctionResult");
+  if (!s) {
+    r.textContent = "英文を入力してね。";
+    return;
+  }
+  let msg = "入力した英文： " + s + "\n\n";
+  let fixed = s;
+  let found = false;
+
+  if (/\bI\s+likes\b/i.test(fixed)) {
+    fixed = fixed.replace(/\bI\s+likes\b/i,"I like");
+    msg += "・Iの後はlikeを使うよ。\n";
+    found = true;
+  }
+  if (/\b(he|she|it)\s+play\b/i.test(fixed)) {
+    fixed = fixed.replace(/\b(he|she|it)\s+play\b/i,"$1 plays");
+    msg += "・he・she・itの現在形ではplaysになるよ。\n";
+    found = true;
+  }
+  if (/\b(he|she|it)\s+like\b/i.test(fixed)) {
+    fixed = fixed.replace(/\b(he|she|it)\s+like\b/i,"$1 likes");
+    msg += "・he・she・itの現在形ではlikesになるよ。\n";
+    found = true;
+  }
+  if (!found) {
+    msg += "登録されたチェック項目では間違いを見つけられなかったよ。\n";
+    msg += "すべての文法が正しいとは限らないので、ほかの部分も確認しよう。\n";
+  }
+  msg += "\n確認用の英文： " + fixed;
+  r.textContent = msg;
+}
+</script>
 </body>
 </html>
 
