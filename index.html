@@ -1,1 +1,197 @@
 
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>English Master</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f3f5f8;color:#202b3c;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:#17365d;color:white;padding:25px 20px}
+header h1{margin:0;font-size:27px}
+header p{margin:7px 0 0;color:#dce8f5}
+main{max-width:720px;margin:auto;padding:18px}
+.panel{background:white;border-radius:15px;padding:20px;margin-bottom:16px;box-shadow:0 3px 12px #15243b12}
+h2{font-size:20px;margin:0 0 12px}
+button{border:0;border-radius:10px;padding:13px 16px;font-size:15px;font-weight:600;cursor:pointer}
+.primary{background:#1d5fa7;color:white}
+.secondary{background:#e8eef5;color:#23415f}
+.menu{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.menu button{min-height:75px}
+.small{font-size:13px;color:#65758a}
+.stat{font-size:25px;font-weight:700;color:#1d5fa7}
+.question{font-size:19px;line-height:1.6;margin:18px 0}
+.choice{display:block;width:100%;text-align:left;margin:9px 0;background:#edf2f7;color:#24364b}
+.choice:disabled{opacity:1}
+.choice.correct{background:#d9f3e3;color:#126536}
+.choice.wrong{background:#ffe1e1;color:#a32626}
+#feedback{line-height:1.7;margin-top:16px}
+.hidden{display:none}
+.topline{display:flex;justify-content:space-between;gap:10px;align-items:center}
+select{padding:10px;border:1px solid #ccd5df;border-radius:8px;background:white}
+footer{text-align:center;color:#8491a1;font-size:12px;padding:20px}
+</style>
+</head>
+<body>
+<header>
+<h1>English Master</h1>
+<p>毎日の学習を、確かな英語力に。</p>
+</header>
+<main>
+<section id="home">
+<div class="panel">
+<h2>学習ダッシュボード</h2>
+<div class="topline">
+<div><div class="small">これまでの正解数</div><div class="stat" id="totalCorrect">0問</div></div>
+<div><div class="small">挑戦した問題</div><div class="stat" id="totalAnswered">0問</div></div>
+</div>
+<p class="small" id="accuracy">正答率：まだ記録がありません</p>
+</div>
+<div class="panel">
+<h2>学習を始める</h2>
+<p class="small">学習したい分野を選んでね。</p>
+<div class="menu">
+<button class="primary" onclick="start('単語')">📘 英単語</button>
+<button class="primary" onclick="start('文法')">✏️ 英文法</button>
+<button class="primary" onclick="start('長文')">📖 長文読解</button>
+<button class="primary" onclick="start('英検')">🏅 英検対策</button>
+</div>
+</div>
+<div class="panel">
+<h2>難易度</h2>
+<select id="level" onchange="saveLevel()">
+<option value="auto">自動調整</option>
+<option value="基礎">基礎</option>
+<option value="標準">標準</option>
+<option value="応用">応用</option>
+</select>
+<p class="small">自動調整では、最近の正答率に合わせて問題の難易度を選びます。</p>
+</div>
+<div class="panel">
+<h2>学習のヒント</h2>
+<p>間違えた問題は、解説を読んでもう一度考えてみよう。少しずつ続けることが大切！</p>
+</div>
+</section>
+
+<section id="quiz" class="hidden">
+<div class="panel">
+<div class="topline">
+<span class="small" id="category"></span>
+<span class="small" id="progress"></span>
+</div>
+<div class="question" id="question"></div>
+<div id="choices"></div>
+<div id="feedback"></div>
+<button class="primary hidden" id="next" onclick="nextQuestion()">次の問題へ →</button>
+<button class="secondary" onclick="goHome()">学習を終了する</button>
+</div>
+</section>
+
+<section id="result" class="hidden">
+<div class="panel">
+<h2>学習結果</h2>
+<div class="stat" id="score"></div>
+<p id="resultMessage"></p>
+<button class="primary" onclick="goHome()">ホームに戻る</button>
+</div>
+</section>
+</main>
+<footer>English Master｜学習記録はこのブラウザに保存されます</footer>
+
+<script>
+const questions = [
+{cat:"単語",level:"基礎",q:"「important」の意味は？",a:["重要な","難しい","静かな","有名な"],c:0,e:"important は「重要な、大切な」という意味です。例：This is important.（これは重要です）",alt:"大切な、重大な"},
+{cat:"単語",level:"基礎",q:"「borrow」の意味は？",a:["貸す","借りる","買う","返す"],c:1,e:"borrow は「借りる」。lend は「貸す」です。",alt:"take and use（借りて使う）"},
+{cat:"単語",level:"標準",q:"「環境」を意味する英単語は？",a:["government","environment","experience","education"],c:1,e:"environment は「環境」という意味です。",alt:"surroundings（周囲の環境）"},
+{cat:"単語",level:"応用",q:"「彼は信頼できる人だ」の reliable に近い意味は？",a:["careless","dependable","nervous","ordinary"],c:1,e:"reliable は「信頼できる」。dependable も近い意味です。",alt:"dependable, trustworthy"},
+{cat:"文法",level:"基礎",q:"I (　) a student.",a:["am","is","are","be"],c:0,e:"主語が I のとき、be動詞は am を使います。",alt:"I am ～.（私は～です）"},
+{cat:"文法",level:"標準",q:"She has lived here (　) three years.",a:["since","for","during","at"],c:1,e:"期間を表す three years の前には for を使います。since は始まった時点に使います。",alt:"for three years（3年間）"},
+{cat:"文法",level:"標準",q:"I know the boy (　) is playing soccer.",a:["which","who","where","when"],c:1,e:"人を説明する関係代名詞で、後ろに動詞が続く場合は who が使えます。",alt:"the boy who ～（～する少年）"},
+{cat:"文法",level:"応用",q:"If it (　) tomorrow, we will stay home.",a:["rain","rains","will rain","raining"],c:1,e:"if を使う条件を表す副詞節では、未来のことでも現在形を使います。主語が it なので rains です。",alt:"If + 現在形, 主語 + will ～"},
+{cat:"長文",level:"基礎",q:"【読解】Tom likes reading books. He goes to the library every Sunday. What does Tom do every Sunday?",a:["He plays tennis.","He goes to the library.","He watches TV.","He studies math."],c:1,e:"本文に He goes to the library every Sunday. とあります。",alt:"goes to the library = 図書館へ行く"},
+{cat:"長文",level:"標準",q:"【読解】Mika wanted to help foreign visitors. So she started studying English every day. Why did Mika study English?",a:["To become a teacher.","To help foreign visitors.","To travel alone.","To read books."],c:1,e:"help foreign visitors（外国人の訪問者を助けるため）と書かれています。",alt:"wanted to help = 助けたいと思った"},
+{cat:"英検",level:"標準",q:"空欄に入る最も自然な語を選ぼう。Would you like (　) tea?",a:["some","any","many","few"],c:0,e:"Would you like ～? の勧誘・申し出では some がよく使われます。",alt:"Would you like some ～?（～はいかがですか）"},
+{cat:"英検",level:"応用",q:"次の文とほぼ同じ意味の文は？ I was too tired to walk.",a:["I was so tired that I could walk.","I was very tired, so I couldn't walk.","I wasn't tired, but I walked.","I walked because I was tired."],c:1,e:"too ～ to ... は「とても～なので…できない」という意味です。",alt:"so ～ that 主語 can't ..."}
+];
+
+let current=[], index=0, correct=0, answered=0;
+let stats=JSON.parse(localStorage.getItem("emStats")||'{"correct":0,"answered":0}');
+let recent=JSON.parse(localStorage.getItem("emRecent")||"[]");
+
+function updateStats(){
+document.getElementById("totalCorrect").textContent=stats.correct+"問";
+document.getElementById("totalAnswered").textContent=stats.answered+"問";
+document.getElementById("accuracy").textContent=stats.answered
+?"正答率："+Math.round(stats.correct/stats.answered*100)+"％"
+:"正答率：まだ記録がありません";
+}
+function saveLevel(){localStorage.setItem("emLevel",document.getElementById("level").value)}
+document.getElementById("level").value=localStorage.getItem("emLevel")||"auto";
+function start(cat){
+let level=document.getElementById("level").value;
+if(level==="auto"){
+let rate=recent.length?recent.filter(Boolean).length/recent.length:0.5;
+level=rate>=0.8?"応用":rate<0.4?"基礎":"標準";
+}
+current=questions.filter(x=>x.cat===cat&&(x.level===level||document.getElementById("level").value==="auto"));
+if(!current.length)current=questions.filter(x=>x.cat===cat);
+current.sort(()=>Math.random()-0.5);
+index=0;correct=0;answered=0;
+document.getElementById("home").classList.add("hidden");
+document.getElementById("result").classList.add("hidden");
+document.getElementById("quiz").classList.remove("hidden");
+showQuestion();
+}
+function showQuestion(){
+let q=current[index];
+document.getElementById("category").textContent=q.cat+"｜"+q.level;
+document.getElementById("progress").textContent=(index+1)+" / "+current.length;
+document.getElementById("question").textContent=q.q;
+document.getElementById("feedback").innerHTML="";
+document.getElementById("next").classList.add("hidden");
+let area=document.getElementById("choices");area.innerHTML="";
+q.a.forEach((v,i)=>{
+let b=document.createElement("button");
+b.className="choice";b.textContent=(i+1)+". "+v;
+b.onclick=()=>checkAnswer(i);
+area.appendChild(b);
+});
+}
+function checkAnswer(n){
+let q=current[index],buttons=document.querySelectorAll(".choice");
+buttons.forEach((b,i)=>{b.disabled=true;if(i===q.c)b.classList.add("correct");if(i===n&&n!==q.c)b.classList.add("wrong")});
+let ok=n===q.c;
+if(ok)correct++;
+answered++;
+stats.answered++;if(ok)stats.correct++;
+recent.push(ok);if(recent.length>10)recent.shift();
+localStorage.setItem("emStats",JSON.stringify(stats));
+localStorage.setItem("emRecent",JSON.stringify(recent));
+updateStats();
+document.getElementById("feedback").innerHTML=
+(ok?"<strong style='color:#168044'>正解！</strong>":"<strong style='color:#c0392b'>不正解</strong>")+
+"<p><b>解説：</b>"+q.e+"</p><p><b>言い換え・関連表現：</b>"+q.alt+"</p>";
+document.getElementById("next").classList.remove("hidden");
+}
+function nextQuestion(){
+index++;
+if(index>=current.length){
+document.getElementById("quiz").classList.add("hidden");
+document.getElementById("result").classList.remove("hidden");
+document.getElementById("score").textContent=correct+" / "+answered+"問 正解";
+document.getElementById("resultMessage").textContent=
+correct===answered?"全問正解！すばらしい！":"間違えた問題の解説を復習してみよう。";
+}else showQuestion();
+}
+function goHome(){
+document.getElementById("quiz").classList.add("hidden");
+document.getElementById("result").classList.add("hidden");
+document.getElementById("home").classList.remove("hidden");
+updateStats();
+}
+updateStats();
+</script>
+</body>
+</html>
+
