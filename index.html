@@ -125,8 +125,18 @@ const questions = [
 {cat:"文法",level:"標準",q:"The boy (　) is running is my brother.",a:["who","where","when"],c:0,e:"人を説明する関係代名詞にはwhoを使います。",alt:"who = ～する人"},
 {cat:"文法",level:"応用",q:"If it (　) tomorrow, we will stay home.",a:["rain","rains","will rain"],c:1,e:"ifを使う条件を表す副詞節では、未来のことでも現在形を使います。",alt:"主語がitなのでrainsです。"},
 {cat:"英検",level:"標準",q:"Would you like (　) coffee?",a:["some","any","many"],c:0,e:"Would you like ～? の勧誘・申し出ではsomeがよく使われます。",alt:"Would you like some ～? = ～はいかがですか？"}
-];
+{cat:"単語",level:"基礎",q:"「図書館」を意味する英単語は？",a:["library","hospital","station"],c:0,e:"library は「図書館」です。"},
+{cat:"単語",level:"標準",q:"「経験」を意味する英単語は？",a:["example","experience","exercise"],c:1,e:"experience は「経験」です。"},
+{cat:"単語",level:"応用",q:"「環境」を意味する英単語は？",a:["environment","education","entertainment"],c:0,e:"environment は「環境」です。"},
+{cat:"文法",level:"基礎",q:"She ( ) tennis every day.",a:["play","plays","playing"],c:1,e:"主語がSheで現在形なので、playsを使います。"},
+{cat:"文法",level:"標準",q:"I have lived here ( ) three years.",a:["for","since","during"],c:0,e:"期間を表すthree yearsの前にはforを使います。"},
+{cat:"文法",level:"応用",q:"If it ( ) tomorrow, we will stay home.",a:["rain","rains","will rain"],c:1,e:"ifを使う条件を表す文では、未来のことでも現在形を使います。"},
+{cat:"長文",level:"基礎",q:"【読解】Tom likes soccer. He plays it every Sunday. What does Tom do every Sunday?",a:["He plays soccer.","He studies English.","He watches TV."],c:0,e:"Tom plays it every Sunday. とあるので、毎週日曜日にサッカーをします。"},
+{cat:"長文",level:"標準",q:"【読解】Mika wanted to be a teacher. She studied English hard. Why did Mika study English?",a:["To become a teacher.","To travel abroad.","To play tennis."],c:0,e:"先生になりたかったからです。"},
+{cat:"英検",level:"基礎",q:"「私は昨日忙しかった。」に合う英文は？",a:["I am busy yesterday.","I was busy yesterday.","I were busy yesterday."],c:1,e:"yesterdayは過去を表すのでwasを使います。"},
+{cat:"英検",level:"応用",q:"If I had more time, I ( ) around the world.",a:["travel","will travel","would travel"],c:2,e:"仮定法ではwould travelを使います。"},
 
+];
 let current=[], index=0, correct=0, answered=0;
 let stats=JSON.parse(localStorage.getItem("emStats")||'{"correct":0,"answered":0}');
 let recent=JSON.parse(localStorage.getItem("emRecent")||"[]");
